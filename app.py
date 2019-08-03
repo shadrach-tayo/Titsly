@@ -17,6 +17,11 @@ def create_tit():
     pass
 
 
+@app.route('/<path>', methods=['GET'])
+def get_link(path):
+    pass
+
+
 if __name__ == "__main__":
     # db.create_connection()
     # db.drop_table()
