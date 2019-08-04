@@ -55,13 +55,9 @@ def save_if_not_exist(key, value):
     data = get_link(key)
     if data:
         return False
-    print(data)
-    try:
-        save_link(key, value)
-        return True
-    except Exception:
-        print(Exception)
-        return False
+
+    save_link(key, value)
+    return True
 
 
 def save_link(tinyurl, link):
