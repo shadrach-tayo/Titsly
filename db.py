@@ -21,11 +21,11 @@ def create_connection():
     try:
         create_table_query = '''CREATE TABLE tits(
         tinyurl TEXT,
-        links TEXT [],        
+        link TEXT
         )
         '''
         cursor = connection.cursor()
-        cursor.execute(create_table_query)
+        # cursor.execute(create_table_query)
         connection.commit()
         print(cursor)
     except Exception as error:
@@ -53,8 +53,15 @@ def drop_table():
 def save_if_not_exist(key, value):
     '''Save tinyurl and link in database if tinyurl doesn\'t exist'''
     data = get_link(key)
+    if data:
+        return False
     print(data)
-    return key
+    try:
+        save_link(key, value)
+        return True
+    except Exception:
+        print(Exception)
+        return False
 
 
 def save_link(tinyurl, link):
@@ -67,7 +74,7 @@ def save_link(tinyurl, link):
                                       )
 
         cursor = connection.cursor()
-        postgres_insert_query = """ INSERT INTO tips (tinyurl, link) VALUES (%s, %s, %s, %s)"""
+        postgres_insert_query = """ INSERT INTO tits (tinyurl, link) VALUES (%s, %s)"""
 
         record_to_insert = (tinyurl, link)
         print(record_to_insert)

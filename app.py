@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import db
 from encoder import generate_tinyurl
 
@@ -31,16 +31,17 @@ def create_tit():
     if it doesn't exist, the store short and long link in database
     '''
     result = db.save_if_not_exist(tinyurl, data['link'])
+    print('result: ', result)
 
     # if it does exist send a customized error message to user
-    if result == True:
-        pass
+    if result:
+        json_response = {'message': 'tiny url created sucessfully',
+                         'success': True, 'tinyurl': request.host_url + tinyurl}
+        return jsonify(json_response)
     else:
-        pass
-
-    return 'work in progress'
-    # else:
-    #     return 'unsupported data format, send json data'
+        json_response = {
+            'message': 'tiny url is already in use, try another one', 'error': True}
+        return jsonify(json_response)
 
 
 @app.route('/<path>', methods=['GET'])
@@ -50,6 +51,6 @@ def get_link(path):
 
 
 if __name__ == "__main__":
-    # db.create_connection()
+    db.create_connection()
     # db.drop_table()
     app.run()
