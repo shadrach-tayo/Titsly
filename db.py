@@ -19,11 +19,9 @@ def create_connection():
                                   )
 
     try:
-        create_table_query = '''CREATE TABLE tips(
-        timestamp TIMESTAMP,
-        pythontip TEXT,
-        links TEXT [],
-        postedBy TEXT
+        create_table_query = '''CREATE TABLE tits(
+        tinyurl TEXT,
+        links TEXT [],        
         )
         '''
         cursor = connection.cursor()
@@ -46,17 +44,20 @@ def drop_table():
                                   )
 
     cursor = connection.cursor()
-    drop_table_query = '''DROP TABLE tips CASCADE;'''
+    drop_table_query = '''DROP TABLE tits CASCADE;'''
     cursor.execute(drop_table_query)
     connection.commit()
     print('table dropped successfully')
 
 
-def add_tip(python_tip):
-    print('add tip ', python_tip)
+def save_if_not_exist(key, value):
+    '''Save tinyurl and link in database if tinyurl doesn\'t exist'''
+    data = get_link(key)
+    print(data)
+    return key
 
 
-def add_tips(python_tips):
+def save_link(tinyurl, link):
     try:
         connection = psycopg2.connect(database=url.path[1:],
                                       user=url.username,
@@ -66,50 +67,22 @@ def add_tips(python_tips):
                                       )
 
         cursor = connection.cursor()
-        postgres_insert_query = """ INSERT INTO tips (timestamp, pythontip, postedby, links) VALUES (%s, %s, %s, %s)"""
-        for tip in python_tips:
-            links = re.findall(r'https?://[^\s<>"]+|www\.[^\s<>"]+', tip[1])
-            print(links)
-            # link = link if len(links) != 0 else ['']
-            record_to_insert = (tip[0], tip[1], tip[2], links)
-            print(record_to_insert)
-            cursor.execute(postgres_insert_query, record_to_insert)
+        postgres_insert_query = """ INSERT INTO tips (tinyurl, link) VALUES (%s, %s, %s, %s)"""
 
-            connection.commit()
+        record_to_insert = (tinyurl, link)
+        print(record_to_insert)
+        cursor.execute(postgres_insert_query, record_to_insert)
+
+        connection.commit()
         print('records inserted')
     except Exception as error:
         if(connection):
             print('failed to insert record to db', error)
 
 
-def get_tips():
+def get_link(filter=None):
     '''
-    Retrieve all python tips in the database and return 
-    '''
-
-    try:
-        connection = psycopg2.connect(database=url.path[1:],
-                                      user=url.username,
-                                      password=url.password,
-                                      host=url.hostname,
-                                      port=url.port
-                                      )
-        cursor = connection.cursor()
-        postgreSQL_select_Query = "select * from tips"
-        cursor.execute(postgreSQL_select_Query)
-        print("Selecting rows from tips table using cursor.fetchall")
-
-        tip_records = cursor.fetchall()
-        print(tip_records[0])
-        print('records fetched')
-        return tip_records
-    except Exception as error:
-        print('failed to get record from db', error)
-
-
-def get_tip(filter=None):
-    '''
-    Retrieve all python tips in the database, filter with text and return 
+    Retrieve link associated with tinyurl in the database
     '''
 
     try:
@@ -121,16 +94,16 @@ def get_tip(filter=None):
                                       )
         cursor = connection.cursor()
         postgreSQL_select_Query = """
-            SELECT * 
-            FROM tips
+            SELECT *
+            FROM tits
             """
         params = []
         if filter is not None:
-            postgreSQL_select_Query += "WHERE position(%s in pythontip) > 0"
+            postgreSQL_select_Query += "WHERE position(%s in tinyurl) > 0"
             params.append(filter)
         cursor.execute(postgreSQL_select_Query, tuple(params))
         # print("Selecting rows from tips table using cursor.fetchall")
 
-        return cursor.fetchall()
+        return cursor.fetchone()
     except Exception as error:
         print('failed to get record(s) from db', error)
