@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 import db
 from encoder import generate_tinyurl
 
@@ -30,24 +30,32 @@ def create_tit():
     '''check if generated short link exists in database
     if it doesn't exist, the store short and long link in database
     '''
-    result = db.save_if_not_exist(tinyurl, data['link'])
-    print('result: ', result)
+    try:
+        saved = db.save_if_not_exist(tinyurl, data['link'])
+    except Exception:
+        return jsonify({'message': 'Server error: Database could not be accessed', 'error': True})
 
     # if it does exist send a customized error message to user
-    if result:
+    if saved:
         json_response = {'message': 'tiny url created sucessfully',
                          'success': True, 'tinyurl': request.host_url + tinyurl}
         return jsonify(json_response)
     else:
         json_response = {
-            'message': 'tiny url is already in use, try another one', 'error': True}
+            'message': '{} is already in use, try another one'.format(data['tinyurl']), 'error': True}
         return jsonify(json_response)
 
 
-@app.route('/<path>', methods=['GET'])
-def get_link(path):
-    print(request.method, path)
-    return path
+@app.route('/<tinyurl>', methods=['GET'])
+def get_link(tinyurl):
+    '''Get link affiliated to tinyurl in the database
+    and redirect response to the link
+    '''
+    data = db.get_link(tinyurl)
+    if data:
+        return redirect(data[1], code=302)
+    else:
+        return jsonify({'message': '{} is not a registered Tits'.format(tinyurl)})
 
 
 if __name__ == "__main__":
