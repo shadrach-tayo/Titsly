@@ -1,8 +1,15 @@
 import psycopg2
 import urllib.parse as up
 import re
+import os
+from dotenv import load_dotenv
 
-db_url = 'postgres://cmhexrqu:fqfwF5DBwUXgNCLeyuqyzq6FY22i-wZP@raja.db.elephantsql.com:5432/cmhexrqu'
+APP_ROOT = os.path.join(os.path.dirname(__file__), '..')
+dotenv_path = os.path.join(APP_ROOT, '.env')
+load_dotenv(dotenv_path)
+
+db_url = os.getenv('DATABASE_URL')
+
 up.uses_netloc.append("postgres")
 url = up.urlparse(db_url)
 
