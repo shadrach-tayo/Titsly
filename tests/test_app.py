@@ -1,4 +1,11 @@
-from nose.tools import *
+import pytest
+from flaskr import flaskr
+
+
+@pytest.fixture
+def client():
+    # flask_app = create_app()
+    pass
 
 
 def setup():
