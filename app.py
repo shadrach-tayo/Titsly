@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, redirect
 import db
-from encoder import generate_tinyurl
 
 app = Flask(__name__, instance_relative_config=True)
 # app.config.from_pyfile('config.py')
